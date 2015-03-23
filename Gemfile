@@ -9,12 +9,7 @@ gem 'rails', '4.1.6'
 gem "therubyracer", :platforms => :ruby #To compile js for react precompile
 gem 'bower-rails'
 gem 'pubnub'
-group :developemnt do
-  gem 'sqlite3'
-end
-group :production do
-  gem 'pg'
-end
+gem 'pg'
 # Use sqlite3 as the database for Active Record
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 4.0.3'
