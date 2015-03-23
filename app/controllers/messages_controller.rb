@@ -30,7 +30,7 @@ class MessagesController < ApplicationController
       if @message.save
         PUBNUB.publish(
           channel: 'demo_chat',
-          message: 'Hello PubNub, love the Ruby SDK!',
+          message: @message.to_json,
         ) { |data| puts data.response }
         format.html { redirect_to @message, notice: 'Message was successfully created.' }
         format.json { render :show, status: :created, location: @message }
