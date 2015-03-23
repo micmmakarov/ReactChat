@@ -2,6 +2,17 @@
 <html>
 <head>
   <title>Reapp</title>
+
+  <script src="https://cdn.pubnub.com/pubnub.min.js"></script>
+  <script type="text/javascript">
+
+      var PUBNUB_demo = PUBNUB.init({
+          publish_key: #{PUBNUB_PUBLISH_KEY},
+          subscribe_key: #{PUBNUB_SUBSCRIBE_KEY}
+      });
+
+  </script>
+
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>

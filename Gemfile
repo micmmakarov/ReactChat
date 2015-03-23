@@ -8,6 +8,7 @@ gem 'haml-rails'
 gem 'rails', '4.1.6'
 gem "therubyracer", :platforms => :ruby #To compile js for react precompile
 gem 'bower-rails'
+gem 'pubnub'
 
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
