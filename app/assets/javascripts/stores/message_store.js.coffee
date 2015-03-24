@@ -7,9 +7,8 @@ window.messageStore = Reflux.createStore
     @listenForMessages()
 
   getInitialState: ->
-    @state =
-      messages: []
-      loaded: false
+    messages: []
+    loaded: false
 
   fetchMessages: ->
     $.ajax

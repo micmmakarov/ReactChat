@@ -1,27 +1,25 @@
 window.presenceStore = Reflux.createStore
   init: ->
-    @state = @getInitialState()
+    @typingUsers = @getInitialState()
     @listenToMany userActions
     @listenTo remoteActions.presence, 'onRemotePresence'
 
   getInitialState: ->
-    @state = {
-      typing_users: {}
-    }
+    {}
 
   typingChange: (user) ->
-    @state.typing_users[user.name] = Date.now()
+    @typingUsers[user.name] = Date.now()
     @trigger @state
     # Just in case user machine will restart
     # 5 seconds timeout
     if @refreshTimer
       clearTimeout @refreshTimer
     @refreshTimer = setTimeout =>
-      @state.typing_users = (user for user in @state.typing_users when Date.now() - value > 5000)
-      typing_users_copy = @state.typing_users[..]
+      @typingUsers = (user for user in @typingUsers when Date.now() - value > 5000)
+      typing_users_copy = @typingUsers[..]
       $.each typing_users_copy, (key, value) ->
         if Date.now() - value > 5000
-          delete @state.typing_users[key]
+          delete @typingUsers[key]
       @trigger @state
     , 5000
 
