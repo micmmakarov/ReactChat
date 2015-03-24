@@ -23,7 +23,6 @@ window.MessageForm = React.createClass
     typing_users[user.name] = Date.now()
     @setState typing_users: typing_users
     _this = @
-    
     # Just in case user machine will restart
     # 5 seconds timeout
     if App.refreshTimer
