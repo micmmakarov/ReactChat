@@ -60,6 +60,9 @@ window.presenceStore = Reflux.createStore
     , 3000
 
   onStopTyping: ->
+    if @myLastTypeTimer
+      clearTimeout @myLastTypeTimer
+
     PUBNUB_demo.state
       channel: "demo_chat",
       uuid: userID,
