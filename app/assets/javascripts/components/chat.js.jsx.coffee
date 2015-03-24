@@ -10,75 +10,24 @@ Message = React.createClass
   propTypes:
     author: React.PropTypes.string.isRequired
     text: React.PropTypes.string.isRequired
+    me: React.PropTypes.bool
     sent: React.PropTypes.bool
 
   render: ->
-    `<div>
+    classes = 'unsent' if @props.me && !@props.sent
+    `<div className={classes}>
     <strong><span>{this.props.author}</span><span>{this.props.sent}</span></strong>:
     <span>{this.props.text}</span>
     </div>
     `
 
 MessageForm = React.createClass
-  typingChange: (user) ->
-    console.log "stateChange"
-    typing_users = @state.typing_users
-    typing_users[user.name] = Date.now()
-    @setState typing_users: typing_users
-    _this = @
-    # Just in case user machine will restart
-    # 5 seconds timeout
-    if App.refreshTimer
-      clearTimeout App.refreshTimer
-    App.refreshTimer = setTimeout ->
-      typing_users = _this.state.typing_users
-      typing_users_copy = (->
-        _this.state.typing_users
-      )()
-      $.each typing_users_copy, (key, value) ->
-        if Date.now() - value > 5000
-          delete typing_users[key]
-      _this.setState typing_users: typing_users
-      _this.setTypingUsers()
-    , 5000
+  setAuthor: ->
+    userActions.setAuthor(React.findDOMNode(this).elements.author.value)
 
-    @setTypingUsers()
-
-  setTypingUsers: ->
-    if Object.keys(@state.typing_users).length > 0
-      typing = Object.keys(@state.typing_users).join(", ") + " are typing at the moment"
-    else
-      typing = ''
-    @setState whosTyping: typing
-  getInitialState: ->
-    App.typingChange = @typingChange
-    {text: '', author: '', whosTyping: '', typing_users: {}}
-  onChange: (fieldName, e) ->
-    data = {}
-    data[fieldName] = e.target.value
-    @setState data
-    if fieldName == "text"
-      name = @state.author
-      PUBNUB_demo.state
-        channel: "demo_chat",
-        uuid: userID,
-        state:
-          name: name
-          typing: true
-          action: 'typing'
-      App.myLastType = Date.now()
-      if App.myLastTypeTimer
-        clearTimeout App.myLastTypeTimer
-      App.myLastTypeTimer = setTimeout ->
-        if Date.now() - App.myLastType > 3000
-          PUBNUB_demo.state
-            channel: "demo_chat",
-            uuid: userID,
-            state:
-              name: name
-              typing: true
-              action: 'stopped-typing'
-      , 3000
+  onChangeText: (e) ->
+    @setAuthor()
+    userActions.typing()
 
   onSubmit: (e) ->
     clearTimeout App.myLastTypeTimer
@@ -97,12 +46,9 @@ MessageForm = React.createClass
 
   render: ->
     `<form onSubmit={this.onSubmit}>
-      <div>
-        {this.state.whosTyping}
-      </div>
-      Author:<input name="author" onChange={this.onChange.bind(this, 'author')} />
+      Author:<input name="author" onChange={this.onChangeAuthor} />
       <br />
-      Message:<input name="text" onChange={this.onChange.bind(this, 'text')} />
+      Message:<input name="text" onChange={this.onChangeText} />
       <button>Send message</button>
     </form>`
 
@@ -110,9 +56,13 @@ MessageList = React.createClass
   propTypes:
     messages: React.PropTypes.array.isRequired
 
+  componentDidUpdate: ->
+    App.scrollBottom()
+
   render: ->
-    list = @props.messages.map (message) ->
-      `<Message text={message.text} author={message.author} sent={message.sent}/>`
+    list = @props.messages.map (message, i) ->
+      message.id = "new-#{i}" if typeof message.id == 'undefined'
+      `<Message key={message.id} text={message.text} author={message.author} me={message.me} sent={message.sent} />`
 
     `<div className="messages-wrapper">
       <div className="messages">
@@ -120,11 +70,29 @@ MessageList = React.createClass
       </div>
     </div>`
 
+TypingIndicator = React.createClass
+  propTypes:
+    typingUsers: React.PropTypes.array.isRequired
+
+  render: ->
+    if @props.typingUsers.length > 1
+      typing = @props.typingUsers.join(", ") + " are typing at the moment"
+    else if @props.typingUsers.length > 0
+      typing = @props.typingUsers[0] + " is typing at the moment"
+
+    `<div>
+      {typing}
+    </div>`
+
 window.Chat = React.createClass
-  mixins: [ Reflux.connect(messageStore) ]
+  mixins: [
+    Reflux.connect(messageStore, 'messages')
+    Reflux.connect(presenceStore, 'presence')
+  ]
 
   render: ->
     `<div>
-      <MessageList messages={this.state.messages} />
+      <MessageList messages={this.state.messages.messages} />
+      <TypingIndicator typingUsers={Object.keys(this.state.presence.typing_users)} />
       <MessageForm />
     </div>`

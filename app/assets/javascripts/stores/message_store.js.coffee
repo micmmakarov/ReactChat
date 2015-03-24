@@ -1,8 +1,10 @@
 window.messageStore = Reflux.createStore
   init: ->
     @listenToMany(userActions)
+    @listenTo remoteActions.message, 'onReceiveMessage'
     @state = @getInitialState()
     @fetchMessages()
+    @listenForMessages()
 
   getInitialState: ->
     @state =
@@ -19,11 +21,30 @@ window.messageStore = Reflux.createStore
       @state.loaded = true
       @trigger @state
 
+  listenForMessages: ->
+    # TODO: Maybe this belongs somewhere else, since it deals with presence also
+    PUBNUB_demo.subscribe
+      channel: 'demo_chat'
+      message: (m) ->
+        remoteActions.message(JSON.parse(m))
+      state:
+        watching: true
+      presence: (m) ->
+        remoteActions.presence(m)
+
+  onReceiveMessage: (message) ->
+    unless @authorName == message.author
+      @state.messages.push message
+      @trigger @state
+
   onSendMessage: (message) ->
-    App.authorName = message.author
+    @authorName = message.author
+    message.me = true
     message.sent = false
     @state.messages.push message
     @trigger @state
+
+    # actually send the message
     $.ajax
       url: "/messages"
       dataType: 'json'
@@ -31,4 +52,5 @@ window.messageStore = Reflux.createStore
       data: {message: message}
     .done (data) =>
       message.sent = true
+      message.id = data.id
       @trigger @state
