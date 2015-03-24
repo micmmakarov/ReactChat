@@ -6,9 +6,12 @@ App.scrollBottom = ->
     $('.messages-wrapper').animate({scrollTop: height})
   , 10
 
-window.Message = React.createClass
-  getInitialState: ->
-    {text: '', author: 'noname', created_at: '', failed: false}
+Message = React.createClass
+  propTypes:
+    author: React.PropTypes.string.isRequired
+    text: React.PropTypes.string.isRequired
+    sent: React.PropTypes.bool
+
   render: ->
     `<div>
     <strong><span>{this.props.author}</span><span>{this.props.sent}</span></strong>:
@@ -16,7 +19,7 @@ window.Message = React.createClass
     </div>
     `
 
-window.MessageForm = React.createClass
+MessageForm = React.createClass
   typingChange: (user) ->
     console.log "stateChange"
     typing_users = @state.typing_users
@@ -43,7 +46,7 @@ window.MessageForm = React.createClass
 
   setTypingUsers: ->
     if Object.keys(@state.typing_users).length > 0
-      typing = Object.keys(@state.typing_users).join(", ") + " are typing at the moment"    
+      typing = Object.keys(@state.typing_users).join(", ") + " are typing at the moment"
     else
       typing = ''
     @setState whosTyping: typing
@@ -77,69 +80,51 @@ window.MessageForm = React.createClass
               action: 'stopped-typing'
       , 3000
 
-  onSubmit: ->
+  onSubmit: (e) ->
     clearTimeout App.myLastTypeTimer
-    data = (=>
-      {
-        text: @state.text
-        author: @state.author
-      }
-    )()
-    App.authorName = data.author
-    message = App.addMessage data
-    @setState text: ''
-    $.ajax
-      url: "/messages"
-      dataType: 'json'
-      method: 'POST'
-      data: {message: data}
-    .done (data) =>
-      message.setProps sent: true
+    e.preventDefault()
+    form = e.target
+
+    data =
+      text: form.elements.text.value
+      author: form.elements.author.value
+
+    # trigger the action
+    userActions.sendMessage data
+
+    # clear out the input
+    form.elements.text.value = ''
 
   render: ->
-    `<div>
+    `<form onSubmit={this.onSubmit}>
       <div>
         {this.state.whosTyping}
       </div>
-      Author:<input onChange={this.onChange.bind(this, 'author')} />
+      Author:<input name="author" onChange={this.onChange.bind(this, 'author')} />
       <br />
-      Message:<input value={this.state.text} onChange={this.onChange.bind(this, 'text')} />
-      <button onClick={this.onSubmit}>Send message</button>
+      Message:<input name="text" onChange={this.onChange.bind(this, 'text')} />
+      <button>Send message</button>
+    </form>`
+
+MessageList = React.createClass
+  propTypes:
+    messages: React.PropTypes.array.isRequired
+
+  render: ->
+    list = @props.messages.map (message) ->
+      `<Message text={message.text} author={message.author} sent={message.sent}/>`
+
+    `<div className="messages-wrapper">
+      <div className="messages">
+        {list}
+      </div>
     </div>`
 
 window.Chat = React.createClass
-  fetchMessages: ->
-    $.ajax
-      url: "/messages"
-      dataType: 'json'
-      method: 'GET'
-    .done (data) =>
-      @setState messages: data
-      @setState loaded: true
-      App.scrollBottom()
-
-  addMessage: (message) ->
-    newMessages = @state.messages.concat [message]
-    @setState messages: newMessages
-    App.scrollBottom()
-    @
-
-  getInitialState: ->
-    App.addMessage = @addMessage
-    @fetchMessages()
-    {loaded: false, messages: [], currentMessage: ''}
+  mixins: [ Reflux.connect(messageStore) ]
 
   render: ->
-    messageElement = (message) ->
-      `<Message text={message.text} author={message.author} sent={message.sent}/>`
-
     `<div>
-      <div className="messages-wrapper">
-        <div className="messages">
-          {this.state.messages.map(messageElement)}
-        </div>
-      </div>
+      <MessageList messages={this.state.messages} />
       <MessageForm />
     </div>`
-
-
