@@ -9,7 +9,7 @@ window.presenceStore = Reflux.createStore
 
   typingChange: (user) ->
     @typingUsers[user.name] = Date.now()
-    @trigger @state
+    @trigger @typingUsers
     # Just in case user machine will restart
     # 5 seconds timeout
     if @refreshTimer
@@ -20,7 +20,7 @@ window.presenceStore = Reflux.createStore
       $.each typing_users_copy, (key, value) ->
         if Date.now() - value > 5000
           delete @typingUsers[key]
-      @trigger @state
+      @trigger @typingUsers
     , 5000
 
   onRemotePresence: (m) ->
