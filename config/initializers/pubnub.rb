@@ -1,0 +1,8 @@
+# I know.
+PUBNUB_PUBLISH_KEY = 'pub-c-f7a3801c-3159-4c2e-82ec-88880d74a21a'
+PUBNUB_SUBSCRIBE_KEY = 'sub-c-180753c6-d191-11e4-844b-0619f8945a4f'
+
+PUBNUB = Pubnub.new(
+  publish_key: PUBNUB_PUBLISH_KEY,
+  subscribe_key: PUBNUB_SUBSCRIBE_KEY
+)
