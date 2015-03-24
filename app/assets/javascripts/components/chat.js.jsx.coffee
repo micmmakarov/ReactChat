@@ -25,7 +25,7 @@ window.MessageForm = React.createClass
     _this = @
     
     # Just in case user machine will restart
-    # 10 seconds timeout
+    # 5 seconds timeout
     if App.refreshTimer
       clearTimeout App.refreshTimer
     App.refreshTimer = setTimeout ->
@@ -34,11 +34,11 @@ window.MessageForm = React.createClass
         _this.state.typing_users
       )()
       $.each typing_users_copy, (key, value) ->
-        if Date.now() - value > 10000
+        if Date.now() - value > 5000
           delete typing_users[key]
       _this.setState typing_users: typing_users
       _this.setTypingUsers()
-    , 10000
+    , 5000
 
     @setTypingUsers()
 
