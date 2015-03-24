@@ -25,7 +25,7 @@ window.MessageForm = React.createClass
     _this = @
     
     # Just in case user machine will restart
-    # 
+    # 10 seconds timeout
     if App.refreshTimer
       clearTimeout App.refreshTimer
     App.refreshTimer = setTimeout ->

@@ -920,3 +920,8 @@ D, [2015-03-23T16:02:23.680556 #86372] DEBUG -- pubnub: Event#handle_response
 D, [2015-03-23T16:02:23.680759 #86372] DEBUG -- pubnub: Event#add_common_data_to_envelopes
 D, [2015-03-23T16:02:23.680869 #86372] DEBUG -- pubnub: Response: [1,"Sent","14271517436754825"]
 D, [2015-03-23T16:02:23.680913 #86372] DEBUG -- pubnub: Firing callbacks
+D, [2015-03-23T17:04:19.714969 #88000] DEBUG -- pubnub: Symbolizing options keys
+D, [2015-03-23T17:04:19.715205 #88000] DEBUG -- pubnub: Setting default values
+D, [2015-03-23T17:04:19.715313 #88000] DEBUG -- pubnub: 
+
+Created new Pubnub::Client instance

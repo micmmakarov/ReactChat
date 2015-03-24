@@ -17,6 +17,11 @@ $ ->
             name: name
             action: action
             uuid: m.uuid
+        #if action == "stopped-typing"
+        #  App.typingChange
+        #    name: name
+        #    action: action
+        #    uuid: m.uuid
 
 
 
